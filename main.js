@@ -46,7 +46,7 @@ function POP3Client(port, host, options) {
 	var self = this;
 	var response = null;
 	var checkResp = true;
-	var bufferedData = "";
+	var bufferedData = null;
 	var state = 0;
 	var locked = false;
 	var multiline = false;
@@ -197,19 +197,18 @@ function POP3Client(port, host, options) {
 	// Event handlers follow
 	function onData(data) {
 
-		data = data.toString("ascii");
-		bufferedData += data;
+		bufferedData = bufferedData ? Buffer.concat([bufferedData, data], bufferedData.length + data.length) : data;
 
-		if (debug) console.log("Server: " + util.inspect(data));
+		if (debug) console.log("Server: " + util.inspect(data.toString('ascii')));
 
 		if (checkResp === true) {
 
-			if (bufferedData.substr(0, 3) === "+OK") {
+			if (bufferedData.toString('ascii', 0, 3) === "+OK") {
 
 				checkResp = false;
 				response = true;
 
-			} else if (bufferedData.substr(0, 4) === "-ERR") {
+			} else if (bufferedData.toString('ascii', 0, 4) === "-ERR") {
 
 				checkResp = false;
 				response = false;
@@ -225,31 +224,33 @@ function POP3Client(port, host, options) {
 
 		if (checkResp === false) {
 
-			if (multiline === true && (response === false || bufferedData.substr(bufferedData.length-5) === "\r\n.\r\n")) {
+			if (multiline === true && (response === false || bufferedData.toString('ascii', bufferedData.length - 5) === "\r\n.\r\n")) {
 
 				// Make a copy to avoid race conditions
 				var responseCopy = response;
+				//var bufferedDataCopy = bufferedData;
 				var bufferedDataCopy = bufferedData;
 
 				response = null;
 				checkResp = true;
 				multiline = false;
-				bufferedData = "";
+				bufferedData = null;
 
-				callback(responseCopy, bufferedDataCopy);
+				callback(responseCopy, bufferedDataCopy.toString('utf-8'));
 
 			} else if (multiline === false) {
 
 				// Make a copy to avoid race conditions
 				var responseCopy = response;
+				//var bufferedDataCopy = bufferedData;
 				var bufferedDataCopy = bufferedData;
 
 				response = null;
 				checkResp = true;
 				multiline = false;
-				bufferedData = "";
+				bufferedData = null;
 
-				callback(responseCopy, bufferedDataCopy);
+				callback(responseCopy, bufferedDataCopy.toString('utf-8'));
 
 			}
 		} 
