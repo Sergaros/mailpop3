@@ -1,6 +1,6 @@
-# node-poplib
+# mailpop3
 
-node-poplib offers an MIT-licensed client library for the POP3 protocol. It is currently provides the following capabilities:
+mailpop3 offers an MIT-licensed client library for the POP3 protocol. It is currently provides the following capabilities:
 
 * USER, PASS, APOP
 * LIST, TOP, RETR, DELE
@@ -21,7 +21,7 @@ It complies to:
 
 You have two installation options:
 
-0. Via npm: `npm install poplib`
+0. Via npm: `npm install mailpop3`
 
 1. Download the source and install it yourself
 
@@ -45,12 +45,12 @@ QUIT success
 
 ## Detailed Usage
 
-node-poplib is event based. It is best to illustrate via examples:
+mailpop3 is event based. It is best to illustrate via examples:
 
 Here we initialize the client (for plain text transmission):
 
 ````javascript
-var POP3Client = require("poplib");
+var POP3Client = require("mailpop3");
 var client = new POP3Client(port, host, {
 
 		tlserrs: false,
