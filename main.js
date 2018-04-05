@@ -40,7 +40,7 @@ function POP3Client(port, host, options) {
 	var ignoretlserrs = options.ignoretlserrs !== undefined ? options.ignoretlserrs: false;
 	var debug = options.debug || false;
 	
-	var tlsDirectOpts = options.tlsopts !== undefined ? options.tlsopts: {};
+	this.tlsDirectOpts = options.tlsopts !== undefined ? options.tlsopts: {};
 
 	// Private variables follow
 	var self = this;
@@ -133,15 +133,14 @@ function POP3Client(port, host, options) {
 	// how to get a public prototypal method (stls) to talk to private method (starttls)
 	// which references private variables without going through a privileged method
 	this.starttls = function(options) {
-
 		var s = socket;
 		s.removeAllListeners("end");
 		s.removeAllListeners("data");
 		s.removeAllListeners("error");
 		socket=null;
 
-		var sslcontext = require('crypto').createCredentials(options);
-		var pair = tls.createSecurePair(sslcontext, false);
+		var sslcontext = require('crypto').createSecureContext(options);
+		var pair = new tls.TLSSocket(sslcontext, false, this.tlsDirectOpts);
 		var cleartext = pipe(pair);
 
 		pair.on('secure', function() {
