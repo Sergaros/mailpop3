@@ -1,29 +1,3 @@
-/*
-
-	Node.js POP3 client library
-
-	Copyright (C) 2011-2013 by Ditesh Shashikant Gathani <ditesh@gathani.org>
-
-	Permission is hereby granted, free of charge, to any person obtaining a copy
-	of this software and associated documentation files (the "Software"), to deal
-	in the Software without restriction, including without limitation the rights
-	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the Software is
-	furnished to do so, subject to the following conditions:
-
-	The above copyright notice and this permission notice shall be included in
-	all copies or substantial portions of the Software.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-	THE SOFTWARE.
-
-*/
-
 var net = require("net"),
 	tls = require("tls"),
 	util = require("util"),
@@ -40,6 +14,7 @@ function POP3Client(port, host, options) {
 	var ignoretlserrs = options.ignoretlserrs !== undefined ? options.ignoretlserrs: false;
 	var debug = options.debug || false;
 	
+	this.secureContextOpts = options.securecontextopts !== undefined ? options.securecontextopts: {};
 	this.tlsDirectOpts = options.tlsopts !== undefined ? options.tlsopts: {};
 
 	// Private variables follow
@@ -132,15 +107,15 @@ function POP3Client(port, host, options) {
 	// starttls() should be a private function, but I can't figure out
 	// how to get a public prototypal method (stls) to talk to private method (starttls)
 	// which references private variables without going through a privileged method
-	this.starttls = function(options) {
+	this.starttls = function() {
 		var s = socket;
 		s.removeAllListeners("end");
 		s.removeAllListeners("data");
 		s.removeAllListeners("error");
 		socket=null;
 
-		var sslcontext = require('crypto').createSecureContext(options);
-		var pair = new tls.TLSSocket(sslcontext, false, this.tlsDirectOpts);
+		var sslcontext = crypto.createSecureContext(this.secureContextOpts);
+		var pair = new tls.TLSSocket(sslcontext, this.tlsDirectOpts);
 		var cleartext = pipe(pair);
 
 		pair.on('secure', function() {

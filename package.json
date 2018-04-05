@@ -26,6 +26,9 @@
         }
     ],
     "dependencies": {},
+    "devDependencies": {
+        "optimist": "*"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/javascriptlove/mailpop3.git"
